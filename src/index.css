@@ -11,8 +11,14 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: linear-gradient(135deg, #FFEDD8 0%, #FAA307 100%);
+  background: linear-gradient(135deg, #FFE5B4 0%, #FF9500 50%, #FF6B35 100%);
   min-height: 100vh;
+  animation: subtle-shimmer 6s ease-in-out infinite alternate;
+}
+
+@keyframes subtle-shimmer {
+  0% { background: linear-gradient(135deg, #FFE5B4 0%, #FF9500 50%, #FF6B35 100%); }
+  100% { background: linear-gradient(135deg, #FFD93D 0%, #6BCF7F 50%, #4D96FF 100%); }
 }
 
 .Toastify__toast-container {
@@ -48,43 +54,78 @@ body {
 }
 
 .board-pattern {
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255, 186, 8, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(232, 93, 4, 0.1) 0%, transparent 50%);
+  background: linear-gradient(45deg, #FF6B6B 25%, transparent 25%), 
+              linear-gradient(-45deg, #4ECDC4 25%, transparent 25%), 
+              linear-gradient(45deg, transparent 75%, #FFE66D 75%), 
+              linear-gradient(-45deg, transparent 75%, #FF8B94 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  animation: carnival-colors 8s ease-in-out infinite;
 }
 
-.mandala-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='rgba(232, 93, 4, 0.1)' fill-opacity='0.3'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20S-10 18.954-10 30s8.954 20 20 20 20-8.954 20-20zM30 30c0-11.046-8.954-20-20-20S-10 18.954-10 30s8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+@keyframes carnival-colors {
+  0% { filter: hue-rotate(0deg) saturate(1.2); }
+  25% { filter: hue-rotate(90deg) saturate(1.4); }
+  50% { filter: hue-rotate(180deg) saturate(1.6); }
+  75% { filter: hue-rotate(270deg) saturate(1.4); }
+  100% { filter: hue-rotate(360deg) saturate(1.2); }
 }
 
-.snake-gradient {
-  background: linear-gradient(135deg, #DC2F02, #D00000);
+.cartoon-snake {
+  background: linear-gradient(45deg, #FF4757, #FF3838);
+  border-radius: 50% 30% 60% 40%;
+  position: relative;
+  animation: snake-wiggle 3s ease-in-out infinite;
 }
 
-.ladder-gradient {
-  background: linear-gradient(135deg, #FFBA08, #FAA307);
+.cartoon-ladder {
+  background: linear-gradient(45deg, #FFD93D, #6BCF7F);
+  border-radius: 10px;
+  position: relative;
+  animation: ladder-sway 2s ease-in-out infinite;
 }
 
-.token-glow {
-  box-shadow: 0 0 20px rgba(255, 186, 8, 0.6);
+@keyframes snake-wiggle {
+  0%, 100% { transform: rotate(-2deg) scale(1); }
+  50% { transform: rotate(2deg) scale(1.05); }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+@keyframes ladder-sway {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
 }
 
-.float-animation {
-  animation: float 3s ease-in-out infinite;
+.token-bounce {
+  animation: bounce-fun 2s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
+@keyframes bounce-fun {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  25% { transform: translateY(-5px) scale(1.1); }
+  50% { transform: translateY(-8px) scale(1.15); }
+  75% { transform: translateY(-3px) scale(1.05); }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  background-size: 200px 100%;
-  animation: shimmer 2s infinite;
+.cartoon-wobble {
+  animation: wobble 0.5s ease-in-out;
+}
+
+@keyframes wobble {
+  0% { transform: translateX(0%); }
+  15% { transform: translateX(-25%) rotate(-5deg); }
+  30% { transform: translateX(20%) rotate(3deg); }
+  45% { transform: translateX(-15%) rotate(-3deg); }
+  60% { transform: translateX(10%) rotate(2deg); }
+  75% { transform: translateX(-5%) rotate(-1deg); }
+  100% { transform: translateX(0%); }
+}
+
+.cartoon-pop {
+  animation: pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }

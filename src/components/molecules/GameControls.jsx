@@ -19,16 +19,24 @@ const GameControls = ({
       <div className="text-center">
         <h2 className="text-2xl font-display text-primary mb-2">
           Current Turn
-        </h2>
+</h2>
         <motion.div
-          className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-3`}
-          style={{ backgroundColor: currentPlayer?.color }}
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 1, repeat: Infinity }}
+          className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 border-4 border-white"
+          style={{ 
+            backgroundColor: currentPlayer?.color,
+            background: `radial-gradient(circle at 30% 30%, ${currentPlayer?.color}, ${currentPlayer?.color}CC)`,
+            boxShadow: `0 0 30px ${currentPlayer?.color}80, 0 4px 20px rgba(0,0,0,0.3)`
+          }}
+          animate={{ 
+            scale: [1, 1.15, 1],
+            rotate: [0, 5, -5, 0],
+            y: [0, -3, 0]
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
         >
-          <ApperIcon name="User" className="w-6 h-6 text-white" />
+          <div className="text-2xl">😊</div>
         </motion.div>
-        <p className="text-lg font-semibold text-gray-800">
+        <p className="text-xl font-bold text-gray-800">
           {currentPlayer?.name}
         </p>
         <p className="text-sm text-gray-600">

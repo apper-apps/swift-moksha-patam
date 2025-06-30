@@ -3,61 +3,74 @@ import { motion } from 'framer-motion';
 import ApperIcon from '@/components/ApperIcon';
 
 const BoardSquare = ({ number, type = 'normal', isHighlighted = false, onClick }) => {
-  const getSquareTheme = () => {
-    // Special squares
+const getSquareTheme = () => {
+    // Special squares with cartoon styling
     if (type === 'snake') {
       return {
-        bg: 'bg-gradient-to-br from-red-100 via-red-50 to-orange-100',
+        bg: 'bg-gradient-to-br from-red-400 to-red-600',
         border: 'border-red-300',
-        text: 'text-red-700',
-        pattern: 'snake-gradient'
+        text: 'text-white font-bold',
+        emoji: '🐍',
+        pattern: 'cartoon-snake'
       };
     }
     if (type === 'ladder') {
       return {
-        bg: 'bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100',
-        border: 'border-emerald-300',
-        text: 'text-emerald-700',
-        pattern: 'ladder-gradient'
+        bg: 'bg-gradient-to-br from-green-400 to-blue-500',
+        border: 'border-green-300',
+        text: 'text-white font-bold',
+        emoji: '🪜',
+        pattern: 'cartoon-ladder'
       };
     }
     
-    // Victory square
+    // Victory square with celebration
     if (number === 100) {
       return {
-        bg: 'bg-gradient-to-br from-yellow-100 via-amber-50 to-orange-100',
+        bg: 'bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500',
         border: 'border-yellow-400',
-        text: 'text-yellow-700',
-        pattern: 'victory-glow'
+        text: 'text-white font-extrabold',
+        emoji: '🏆',
+        pattern: 'cartoon-pop'
       };
     }
     
-    // Thematic squares based on number ranges
-    if (number >= 90) return { bg: 'bg-gradient-to-br from-purple-50 to-indigo-100', border: 'border-purple-200', text: 'text-purple-700' };
-    if (number >= 80) return { bg: 'bg-gradient-to-br from-blue-50 to-cyan-100', border: 'border-blue-200', text: 'text-blue-700' };
-    if (number >= 70) return { bg: 'bg-gradient-to-br from-teal-50 to-emerald-100', border: 'border-teal-200', text: 'text-teal-700' };
-    if (number >= 60) return { bg: 'bg-gradient-to-br from-green-50 to-lime-100', border: 'border-green-200', text: 'text-green-700' };
-    if (number >= 50) return { bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', border: 'border-yellow-200', text: 'text-yellow-700' };
-    if (number >= 40) return { bg: 'bg-gradient-to-br from-orange-50 to-red-100', border: 'border-orange-200', text: 'text-orange-700' };
-    if (number >= 30) return { bg: 'bg-gradient-to-br from-pink-50 to-rose-100', border: 'border-pink-200', text: 'text-pink-700' };
-    if (number >= 20) return { bg: 'bg-gradient-to-br from-violet-50 to-purple-100', border: 'border-violet-200', text: 'text-violet-700' };
-    if (number >= 10) return { bg: 'bg-gradient-to-br from-indigo-50 to-blue-100', border: 'border-indigo-200', text: 'text-indigo-700' };
-    return { bg: 'bg-gradient-to-br from-gray-50 to-slate-100', border: 'border-gray-200', text: 'text-gray-700' };
+    // Colorful cartoon squares based on ranges
+    const colors = [
+      { range: 90, bg: 'from-purple-400 to-pink-500', border: 'purple-300', text: 'white', emoji: '👑' },
+      { range: 80, bg: 'from-blue-400 to-indigo-500', border: 'blue-300', text: 'white', emoji: '🔮' },
+      { range: 70, bg: 'from-teal-400 to-green-500', border: 'teal-300', text: 'white', emoji: '🍀' },
+      { range: 60, bg: 'from-green-400 to-emerald-500', border: 'green-300', text: 'white', emoji: '🌟' },
+      { range: 50, bg: 'from-yellow-400 to-orange-500', border: 'yellow-300', text: 'white', emoji: '🌻' },
+      { range: 40, bg: 'from-orange-400 to-red-500', border: 'orange-300', text: 'white', emoji: '🎨' },
+      { range: 30, bg: 'from-pink-400 to-rose-500', border: 'pink-300', text: 'white', emoji: '🌺' },
+      { range: 20, bg: 'from-violet-400 to-purple-500', border: 'violet-300', text: 'white', emoji: '🦄' },
+      { range: 10, bg: 'from-indigo-400 to-blue-500', border: 'indigo-300', text: 'white', emoji: '⚡' },
+      { range: 0, bg: 'from-gray-300 to-gray-400', border: 'gray-300', text: 'gray-700', emoji: '🌱' }
+    ];
+    
+    const colorScheme = colors.find(c => number >= c.range);
+    return {
+      bg: `bg-gradient-to-br ${colorScheme.bg}`,
+      border: `border-${colorScheme.border}`,
+      text: `text-${colorScheme.text} font-bold`,
+      emoji: colorScheme.emoji
+    };
   };
 
   const getSquareIcon = () => {
-    if (type === 'snake') return <ApperIcon name="Zap" className="w-3 h-3 text-red-600" />;
-    if (type === 'ladder') return <ApperIcon name="TrendingUp" className="w-3 h-3 text-emerald-600" />;
-    if (number === 100) return <ApperIcon name="Crown" className="w-4 h-4 text-yellow-600" />;
+    if (type === 'snake') return '🐍';
+    if (type === 'ladder') return '🪜';
+    if (number === 100) return '🏆';
     
-    // Contextual icons based on number significance
-    if (number % 10 === 0) return <ApperIcon name="Star" className="w-3 h-3 opacity-60" />;
-    if (number === 1) return <ApperIcon name="Play" className="w-3 h-3 text-green-600" />;
+    // Fun icons based on number significance
+    if (number % 10 === 0) return '⭐';
+    if (number === 1) return '🚀';
     if ([13, 17, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97].includes(number)) {
-      return <ApperIcon name="Sparkles" className="w-2 h-2 opacity-50" />;
+      return '✨';
     }
-    if (number % 5 === 0) return <ApperIcon name="Diamond" className="w-2 h-2 opacity-40" />;
-    if (number % 7 === 0) return <ApperIcon name="Heart" className="w-2 h-2 text-pink-500 opacity-60" />;
+    if (number % 5 === 0) return '💎';
+    if (number % 7 === 0) return '❤️';
     
     return null;
   };
@@ -88,7 +101,11 @@ const BoardSquare = ({ number, type = 'normal', isHighlighted = false, onClick }
         group
       `}
       onClick={onClick}
-      whileHover={{ scale: 1.05, rotate: [0, 1, 0] }}
+whileHover={{ 
+        scale: 1.1, 
+        rotate: [0, -2, 2, 0],
+        className: "cartoon-wobble"
+      }}
       whileTap={{ scale: 0.95 }}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}

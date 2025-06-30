@@ -39,11 +39,14 @@ const GameBoard = ({ players, currentPlayerIndex, onSquareClick }) => {
 
   return (
     <div className="relative">
-      <motion.div
-        className="grid grid-cols-10 gap-1 bg-gradient-to-br from-primary/10 to-secondary/10 p-4 rounded-2xl shadow-game board-pattern"
+<motion.div
+        className="grid grid-cols-10 gap-2 bg-gradient-to-br from-pink-300 via-purple-300 to-blue-300 p-6 rounded-3xl shadow-2xl board-pattern"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
+        style={{
+          boxShadow: '0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5)'
+        }}
       >
         {boardNumbers.map((row, rowIndex) =>
           row.map((number, colIndex) => {
@@ -88,50 +91,25 @@ const GameBoard = ({ players, currentPlayerIndex, onSquareClick }) => {
         )}
       </motion.div>
 
-{/* Snakes and Ladders 3D overlay */}
+{/* Cartoon Snakes and Ladders 2D overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        <Canvas
-          camera={{
-            position: [0, 0, 100],
-            fov: 45,
-            near: 0.1,
-            far: 1000,
-          }}
-          style={{ width: '100%', height: '100%' }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(0x000000, 0);
-          }}
-        >
-          <ambientLight intensity={0.5} />
-          <directionalLight 
-            position={[10, 10, 5]} 
-            intensity={0.8}
-            castShadow
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
+        {mockBoardData.snakePositions.map((snake, index) => (
+          <SnakeElement
+            key={`snake-${index}`}
+            head={snake.head}
+            tail={snake.tail}
+            boardNumbers={boardNumbers}
           />
-          <pointLight position={[-10, -10, -5]} intensity={0.3} />
-          
-          <Suspense fallback={null}>
-            {mockBoardData.snakePositions.map((snake, index) => (
-              <SnakeElement
-                key={`snake-${index}`}
-                head={snake.head}
-                tail={snake.tail}
-                boardNumbers={boardNumbers}
-              />
-            ))}
-            
-            {mockBoardData.ladderPositions.map((ladder, index) => (
-              <LadderElement
-                key={`ladder-${index}`}
-                bottom={ladder.bottom}
-                top={ladder.top}
-                boardNumbers={boardNumbers}
-              />
-            ))}
-          </Suspense>
-        </Canvas>
+        ))}
+        
+        {mockBoardData.ladderPositions.map((ladder, index) => (
+          <LadderElement
+            key={`ladder-${index}`}
+            bottom={ladder.bottom}
+            top={ladder.top}
+            boardNumbers={boardNumbers}
+          />
+        ))}
       </div>
     </div>
   );

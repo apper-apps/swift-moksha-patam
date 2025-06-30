@@ -225,8 +225,8 @@ const rollDice = async () => {
     return <PlayerSetup onStartGame={startNewGame} />;
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-surface">
+return (
+    <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-400">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <motion.div
@@ -235,11 +235,29 @@ const rollDice = async () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-display text-primary mb-2">
-            Moksha Patam
-          </h1>
-          <p className="text-gray-600 font-body">
-            The Ancient Game of Snakes and Ladders
+          <motion.h1 
+            className="text-5xl font-display text-white mb-2 drop-shadow-lg"
+            animate={{ 
+              scale: [1, 1.05, 1],
+              textShadow: [
+                "0 0 10px rgba(255,255,255,0.5)", 
+                "0 0 20px rgba(255,255,255,0.8)", 
+                "0 0 10px rgba(255,255,255,0.5)"
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{
+              background: 'linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FECA57)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundSize: '300% 300%',
+              animation: 'gradient-shift 4s ease infinite'
+            }}
+          >
+            🐍 Moksha Patam 🪜
+          </motion.h1>
+          <p className="text-2xl text-white font-body drop-shadow-md">
+            🎯 The Magical Game of Snakes and Ladders! ✨
           </p>
         </motion.div>
 
