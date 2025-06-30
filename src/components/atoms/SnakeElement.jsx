@@ -1,5 +1,86 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { motion } from 'framer-motion';
+import * as THREE from 'three';
+
+const Snake3D = ({ startPos, endPos, midPos, head }) => {
+  // Create curve for snake body
+  const curve = useMemo(() => {
+    const start = new THREE.Vector3(0, 0, 0);
+    const mid = new THREE.Vector3(
+      (midPos.x - startPos.x) * 0.1, 
+      (midPos.y - startPos.y) * 0.1, 
+      15
+    );
+    const end = new THREE.Vector3(
+      (endPos.x - startPos.x) * 0.1, 
+      (endPos.y - startPos.y) * 0.1, 
+      0
+    );
+    
+    return new THREE.QuadraticBezierCurve3(start, mid, end);
+  }, [startPos, endPos, midPos]);
+
+  const tubeGeometry = useMemo(() => {
+    return new THREE.TubeGeometry(curve, 20, 3, 8, false);
+  }, [curve]);
+
+  // Snake colors
+  const snakeColor = '#DC2F02';
+  const scaleColor = '#8B0000';
+
+  // Create segments for scale pattern
+  const segments = 15;
+  const segmentPositions = useMemo(() => {
+    const positions = [];
+    for (let i = 0; i < segments; i++) {
+      const t = i / (segments - 1);
+      const point = curve.getPoint(t);
+      positions.push(point);
+    }
+    return positions;
+  }, [curve, segments]);
+
+  return (
+    <group>
+      {/* Main snake body */}
+      <mesh>
+        <primitive object={tubeGeometry} />
+        <meshLambertMaterial color={snakeColor} />
+      </mesh>
+      
+      {/* Scale segments */}
+      {segmentPositions.map((pos, index) => (
+        <mesh key={index} position={pos} scale={[1, 1, 0.8]}>
+          <ringGeometry args={[2.5, 3.5, 8]} />
+          <meshLambertMaterial color={scaleColor} transparent opacity={0.7} />
+        </mesh>
+      ))}
+      
+      {/* Snake head (larger sphere) */}
+      <mesh position={segmentPositions[0]} scale={[1.5, 1.5, 1.5]}>
+        <sphereGeometry args={[4, 12, 8]} />
+        <meshLambertMaterial color="#FF0000" />
+      </mesh>
+      
+      {/* Snake eyes */}
+      <mesh position={[segmentPositions[0].x - 1.5, segmentPositions[0].y + 1, segmentPositions[0].z + 3]}>
+        <sphereGeometry args={[0.8, 8, 6]} />
+        <meshLambertMaterial color="#000000" />
+      </mesh>
+      <mesh position={[segmentPositions[0].x + 1.5, segmentPositions[0].y + 1, segmentPositions[0].z + 3]}>
+        <sphereGeometry args={[0.8, 8, 6]} />
+        <meshLambertMaterial color="#000000" />
+      </mesh>
+      
+      {/* Snake tail (smaller sphere) */}
+      <mesh position={segmentPositions[segmentPositions.length - 1]} scale={[0.8, 0.8, 0.8]}>
+        <sphereGeometry args={[3, 10, 6]} />
+        <meshLambertMaterial color={scaleColor} />
+      </mesh>
+    </group>
+  );
+};
 
 const SnakeElement = ({ head, tail, boardNumbers }) => {
   // Calculate positions based on board layout
@@ -17,8 +98,8 @@ const SnakeElement = ({ head, tail, boardNumbers }) => {
   const headPos = getSquarePosition(head);
   const tailPos = getSquarePosition(tail);
   
-  // Calculate SVG path for snake
-  const squareSize = 40; // Approximate size of each square
+  // Calculate positions and curve
+  const squareSize = 40;
   const startX = headPos.col * squareSize + squareSize / 2;
   const startY = headPos.row * squareSize + squareSize / 2;
   const endX = tailPos.col * squareSize + squareSize / 2;
@@ -26,64 +107,48 @@ const SnakeElement = ({ head, tail, boardNumbers }) => {
   
   // Create curved path
   const midX = (startX + endX) / 2;
-  const midY = (startY + endY) / 2 - 50; // Curve upward
-  
-  const pathData = `M${startX},${startY} Q${midX},${midY} ${endX},${endY}`;
+  const midY = (startY + endY) / 2 - 50;
 
   return (
-    <motion.svg
+    <motion.div
       className="absolute inset-0 w-full h-full pointer-events-none z-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      style={{
+        left: Math.min(startX, endX) - 30,
+        top: Math.min(startY, endY) - 60,
+        width: Math.abs(endX - startX) + 60,
+        height: Math.abs(endY - startY) + 120,
+      }}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1, delay: 0.5 }}
     >
-      <defs>
-        <linearGradient id={`snake-gradient-${head}`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#DC2F02" />
-          <stop offset="50%" stopColor="#D00000" />
-          <stop offset="100%" stopColor="#DC2F02" />
-        </linearGradient>
-        <filter id={`snake-shadow-${head}`}>
-          <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="rgba(0,0,0,0.3)" />
-        </filter>
-      </defs>
-      
-      <motion.path
-        d={pathData}
-        stroke={`url(#snake-gradient-${head})`}
-        strokeWidth="8"
-        fill="none"
-        strokeLinecap="round"
-        filter={`url(#snake-shadow-${head})`}
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1, delay: 0.5 }}
-      />
-      
-      {/* Snake head */}
-      <motion.circle
-        cx={startX}
-        cy={startY}
-        r="6"
-        fill="#DC2F02"
-        filter={`url(#snake-shadow-${head})`}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 1 }}
-      />
-      
-      {/* Snake tail */}
-      <motion.circle
-        cx={endX}
-        cy={endY}
-        r="4"
-        fill="#D00000"
-        filter={`url(#snake-shadow-${head})`}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 1.2 }}
-      />
-    </motion.svg>
+      <Canvas
+        camera={{
+          position: [0, -30, 80],
+          fov: 45,
+          near: 0.1,
+          far: 1000,
+        }}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight 
+          position={[10, 10, 10]} 
+          intensity={0.8}
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+        <pointLight position={[-10, -10, 5]} intensity={0.4} color="#FF6B6B" />
+        
+        <Snake3D 
+          startPos={{ x: startX, y: startY }}
+          endPos={{ x: endX, y: endY }}
+          midPos={{ x: midX, y: midY }}
+          head={head}
+        />
+      </Canvas>
+    </motion.div>
   );
 };
 
