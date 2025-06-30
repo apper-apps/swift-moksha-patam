@@ -8,9 +8,9 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
-  },
-"dependencies": {
-    "@reduxjs/toolkit": "^2.9.0",
+},
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
     "apexcharts": "^4.7.0",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^4.1.0",
