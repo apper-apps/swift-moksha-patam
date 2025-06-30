@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import * as THREE from 'three';
 
@@ -109,46 +108,22 @@ const SnakeElement = ({ head, tail, boardNumbers }) => {
   const midX = (startX + endX) / 2;
   const midY = (startY + endY) / 2 - 50;
 
+// Convert positions to 3D coordinates
+  const position = [
+    (startX + endX) / 2 - 200,
+    200 - (startY + endY) / 2,
+    0
+  ];
+  
   return (
-    <motion.div
-      className="absolute inset-0 w-full h-full pointer-events-none z-10"
-      style={{
-        left: Math.min(startX, endX) - 30,
-        top: Math.min(startY, endY) - 60,
-        width: Math.abs(endX - startX) + 60,
-        height: Math.abs(endY - startY) + 120,
-      }}
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1, delay: 0.5 }}
-    >
-      <Canvas
-        camera={{
-          position: [0, -30, 80],
-          fov: 45,
-          near: 0.1,
-          far: 1000,
-        }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <ambientLight intensity={0.5} />
-        <directionalLight 
-          position={[10, 10, 10]} 
-          intensity={0.8}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <pointLight position={[-10, -10, 5]} intensity={0.4} color="#FF6B6B" />
-        
-        <Snake3D 
-          startPos={{ x: startX, y: startY }}
-          endPos={{ x: endX, y: endY }}
-          midPos={{ x: midX, y: midY }}
-          head={head}
-        />
-      </Canvas>
-    </motion.div>
+    <group position={position}>
+      <Snake3D 
+        startPos={{ x: 0, y: 0 }}
+        endPos={{ x: endX - startX, y: startY - endY }}
+        midPos={{ x: midX - startX, y: startY - midY }}
+        head={head}
+      />
+    </group>
   );
 };
 

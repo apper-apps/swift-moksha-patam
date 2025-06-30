@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import BoardSquare from '@/components/atoms/BoardSquare';
 import PlayerToken from '@/components/atoms/PlayerToken';
@@ -87,25 +88,50 @@ const GameBoard = ({ players, currentPlayerIndex, onSquareClick }) => {
         )}
       </motion.div>
 
-      {/* Snakes and Ladders overlays */}
+{/* Snakes and Ladders 3D overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        {mockBoardData.snakePositions.map((snake, index) => (
-          <SnakeElement
-            key={`snake-${index}`}
-            head={snake.head}
-            tail={snake.tail}
-            boardNumbers={boardNumbers}
+        <Canvas
+          camera={{
+            position: [0, 0, 100],
+            fov: 45,
+            near: 0.1,
+            far: 1000,
+          }}
+          style={{ width: '100%', height: '100%' }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+          }}
+        >
+          <ambientLight intensity={0.5} />
+          <directionalLight 
+            position={[10, 10, 5]} 
+            intensity={0.8}
+            castShadow
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
           />
-        ))}
-        
-        {mockBoardData.ladderPositions.map((ladder, index) => (
-          <LadderElement
-            key={`ladder-${index}`}
-            bottom={ladder.bottom}
-            top={ladder.top}
-            boardNumbers={boardNumbers}
-          />
-        ))}
+          <pointLight position={[-10, -10, -5]} intensity={0.3} />
+          
+          <Suspense fallback={null}>
+            {mockBoardData.snakePositions.map((snake, index) => (
+              <SnakeElement
+                key={`snake-${index}`}
+                head={snake.head}
+                tail={snake.tail}
+                boardNumbers={boardNumbers}
+              />
+            ))}
+            
+            {mockBoardData.ladderPositions.map((ladder, index) => (
+              <LadderElement
+                key={`ladder-${index}`}
+                bottom={ladder.bottom}
+                top={ladder.top}
+                boardNumbers={boardNumbers}
+              />
+            ))}
+          </Suspense>
+        </Canvas>
       </div>
     </div>
   );
