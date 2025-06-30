@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import confetti from 'canvas-confetti';
 import PlayerSetup from '@/components/molecules/PlayerSetup';
 import GameBoard from '@/components/molecules/GameBoard';
 import GameControls from '@/components/molecules/GameControls';
@@ -45,14 +46,16 @@ const GamePage = () => {
       setIsLoading(true);
       setError(null);
       
-      await gameService.getBoardData();
+await gameService.getBoardData();
       
       const newGameState = {
         players: players,
         currentPlayerIndex: 0,
         isGameOver: false,
         winner: null,
-        turnCount: 0
+        turnCount: 0,
+        computerDifficulty: 'intermediate', // basic, intermediate, advanced
+        isComputerTurn: false
       };
       
       setGameState(newGameState);
@@ -69,70 +72,122 @@ const GamePage = () => {
     }
   };
 
-  const rollDice = async () => {
+const rollDice = async () => {
     if (isRolling || gameState?.isGameOver) return;
 
     try {
       setIsRolling(true);
       setError(null);
       
-      // Simulate dice roll delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const diceValue = gameService.rollDice();
-      setLastDiceRoll(diceValue);
-      
-      // Move current player
       const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-      const newPosition = gameService.calculateNewPosition(currentPlayer.position, diceValue);
       
-      // Check for snakes and ladders
-      const specialSquare = gameService.checkSpecialSquare(newPosition);
-      const finalPosition = specialSquare ? specialSquare.destination : newPosition;
-      
-      // Update game state
-      const updatedPlayers = gameState.players.map((player, index) => {
-        if (index === gameState.currentPlayerIndex) {
-          return { ...player, position: finalPosition };
-        }
-        return player;
-      });
-      
-      // Check for victory
-      const isVictory = finalPosition >= 100;
-      const winner = isVictory ? updatedPlayers[gameState.currentPlayerIndex] : null;
-      
-      const newGameState = {
-        ...gameState,
-        players: updatedPlayers,
-        currentPlayerIndex: isVictory ? gameState.currentPlayerIndex : (gameState.currentPlayerIndex + 1) % gameState.players.length,
-        isGameOver: isVictory,
-        winner: winner,
-        turnCount: gameState.turnCount + 1
-      };
-      
-      setGameState(newGameState);
-      await gameService.saveGameState(newGameState);
-      
-      // Show appropriate messages
-      if (specialSquare) {
-        if (specialSquare.type === 'snake') {
-          toast.error(`${currentPlayer.name} encountered a snake! Slide down to ${specialSquare.destination}`);
-        } else if (specialSquare.type === 'ladder') {
-          toast.success(`${currentPlayer.name} climbed a ladder! Advance to ${specialSquare.destination}`);
-        }
+      // Check if it's a computer player
+      if (currentPlayer.isComputer) {
+        await handleComputerTurn();
+        return;
       }
       
-      if (isVictory) {
-        setShowVictoryModal(true);
-        toast.success(`${winner.name} wins! Congratulations!`);
-      }
+      // Human player turn
+      await executePlayerTurn();
       
     } catch (err) {
       setError('Failed to roll dice');
       toast.error('Failed to roll dice');
     } finally {
       setIsRolling(false);
+    }
+  };
+
+  const executePlayerTurn = async () => {
+    // Simulate dice roll delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const diceValue = gameService.rollDice();
+    setLastDiceRoll(diceValue);
+    
+    await processPlayerMove(diceValue);
+  };
+
+  const handleComputerTurn = async () => {
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    toast.info(`${currentPlayer.name} is thinking...`);
+    
+    // Computer thinking delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const computerMove = await gameService.makeComputerMove(
+      currentPlayer,
+      gameState.computerDifficulty,
+      gameState
+    );
+    
+    setLastDiceRoll(computerMove.diceValue);
+    toast.info(`${currentPlayer.name} rolled a ${computerMove.diceValue}!`);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await processPlayerMove(computerMove.diceValue);
+  };
+
+  const processPlayerMove = async (diceValue) => {
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    const newPosition = gameService.calculateNewPosition(currentPlayer.position, diceValue);
+    
+    // Check for snakes and ladders
+    const specialSquare = gameService.checkSpecialSquare(newPosition);
+    const finalPosition = specialSquare ? specialSquare.destination : newPosition;
+    
+    // Update game state
+    const updatedPlayers = gameState.players.map((player, index) => {
+      if (index === gameState.currentPlayerIndex) {
+        return { ...player, position: finalPosition };
+      }
+      return player;
+    });
+    
+    // Check for victory
+    const isVictory = finalPosition >= 100;
+    const winner = isVictory ? updatedPlayers[gameState.currentPlayerIndex] : null;
+    
+    const newGameState = {
+      ...gameState,
+      players: updatedPlayers,
+      currentPlayerIndex: isVictory ? gameState.currentPlayerIndex : (gameState.currentPlayerIndex + 1) % gameState.players.length,
+      isGameOver: isVictory,
+      winner: winner,
+      turnCount: gameState.turnCount + 1
+    };
+    
+    setGameState(newGameState);
+    await gameService.saveGameState(newGameState);
+    
+    // Show appropriate messages
+    if (specialSquare) {
+      if (specialSquare.type === 'snake') {
+        toast.error(`${currentPlayer.name} encountered a snake! Slide down to ${specialSquare.destination}`);
+      } else if (specialSquare.type === 'ladder') {
+        toast.success(`${currentPlayer.name} climbed a ladder! Advance to ${specialSquare.destination}`);
+      }
+    }
+    
+    if (isVictory) {
+      setShowVictoryModal(true);
+      // Victory confetti
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      toast.success(`${winner.name} wins! Congratulations!`);
+    } else {
+      // Auto-trigger computer turn after delay
+      const nextPlayer = newGameState.players[newGameState.currentPlayerIndex];
+      if (nextPlayer?.isComputer && !newGameState.isGameOver) {
+        setTimeout(() => {
+          if (!isRolling) {
+            rollDice();
+          }
+        }, 2000);
+      }
     }
   };
 
