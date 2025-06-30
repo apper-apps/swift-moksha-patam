@@ -10,14 +10,14 @@
     "preview": "vite preview"
   },
 "dependencies": {
-    "@react-three/fiber": "^8.19.0",
+    "@react-three/fiber": "^9.1.4",
     "@reduxjs/toolkit": "^2.8.2",
     "apexcharts": "^4.7.0",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.468.0",
-"react": "^19.1.0",
+    "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.1.0",
     "react-konva": "^19.0.6",
